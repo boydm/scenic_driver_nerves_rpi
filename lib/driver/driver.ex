@@ -14,7 +14,7 @@ defmodule Scenic.Driver.Rpi do
 
   import IEx
 
-  @port  '/scenic_driver_vc4'
+  @port  '/scenic_driver_rpi'
 
   @default_width            -1      # -1 means to use the native width
   @default_height           -1      # -1 means to use the native height
