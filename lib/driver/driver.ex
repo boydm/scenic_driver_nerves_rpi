@@ -65,7 +65,7 @@ defmodule Scenic.Driver.Rpi do
 
     # open and initialize the window
     Process.flag(:trap_exit, true)
-    executable = :code.priv_dir(:scenic_nerves_dev) ++ @port ++ port_args
+    executable = :code.priv_dir(:scenic_driver_rpi) ++ @port ++ port_args
 
     # port = Port.open({:spawn, executable}, [:binary, {:packet, 4}])
     port = Port.open({:spawn, executable}, [:binary, {:packet, 4}])
