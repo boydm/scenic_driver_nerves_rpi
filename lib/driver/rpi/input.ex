@@ -105,7 +105,16 @@ defmodule Scenic.Driver.Rpi.Input do
     |> Map.put( :last_used_dl, start_dl )
     |> Map.put( :window, { width, height } )
     
+    driver_data = %ViewPort.Driver.Info{
+      module: Scenic.Driver.Rpi,
+      type: "Static Monitor",
+      width: width,
+      height: height,
+      pid: self()
+    }
+
     GenServer.cast(viewport, {:driver_ready, self()})
+    GenServer.cast(viewport, {:driver_register, driver_data})
 
     { :noreply, state }
   end
