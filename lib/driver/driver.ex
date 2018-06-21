@@ -129,7 +129,6 @@ defmodule Scenic.Driver.Rpi do
       _ ->
         {:noreply, state}
     end
-    {:noreply, state}
   end
 
   #--------------------------------------------------------
