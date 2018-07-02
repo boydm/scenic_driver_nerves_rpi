@@ -760,7 +760,7 @@ void run_script( GLuint script_id, driver_data_t* p_data ) {
   };
 
   // setup
-  NVGcontext* p_ctx = p_data->context.p_ctx;
+  NVGcontext* p_ctx = p_data->p_ctx;
 
   // get the first op
   GLuint op = *(GLuint*)p_script;
