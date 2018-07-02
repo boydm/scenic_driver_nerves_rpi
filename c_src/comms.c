@@ -57,10 +57,10 @@ The caller will typically be erlang, so use the 2-byte length indicator
 #define   CMD_CLEAR_GRAPH           0x02
 #define   CMD_SET_ROOT              0x03
 
+#define   CMD_CLEAR_COLOR           0x05
+
 // #define   CMD_CACHE_LOAD            0x03
 // #define   CMD_CACHE_RELEASE         0x04
-
-#define   CMD_CLEAR_COLOR           0x05
 
 #define   CMD_INPUT                 0x0A
 
@@ -530,6 +530,7 @@ void receive_set_root( int* p_msg_length, driver_data_t* p_data ) {
 //  }
 }
 
+
 //---------------------------------------------------------
 typedef struct __attribute__((__packed__)) 
 {
@@ -544,6 +545,7 @@ void receive_clear_color( int* p_msg_length ) {
   read_bytes_down( &cc, sizeof(clear_color_t), p_msg_length);
   glClearColor(cc.r/255.0, cc.g/255.0, cc.b/255.0, cc.a/255.0);
 }
+
 
 //---------------------------------------------------------
 typedef struct __attribute__((__packed__)) 
