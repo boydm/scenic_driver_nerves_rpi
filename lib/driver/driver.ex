@@ -25,6 +25,8 @@ defmodule Scenic.Driver.Rpi do
 
   @default_debug            false
 
+  @default_clear_color      {0,0,0,0xFF}
+
   #============================================================================
   # client callable api
 
@@ -87,6 +89,7 @@ defmodule Scenic.Driver.Rpi do
       last_used_dl:   nil,
       dl_map:         %{},
       used_dls:       %{},
+      clear_color:    @default_clear_color,
 
       textures:       %{},
       fonts:          %{},
