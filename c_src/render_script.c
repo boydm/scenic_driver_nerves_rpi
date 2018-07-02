@@ -367,7 +367,7 @@ void* paint_radial( NVGcontext* p_ctx, void* p_script ) {
   return p_script + sizeof(radial_gradient_t);
 }
 
-void* paint_image( NVGcontext* p_ctx, void* p_script, window_data_t* p_data ) {
+void* paint_image( NVGcontext* p_ctx, void* p_script, driver_data_t* p_data ) {
   image_pattern_t* img = (image_pattern_t*)p_script;
   p_script += sizeof(image_pattern_t);
 
