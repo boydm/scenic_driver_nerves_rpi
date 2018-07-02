@@ -745,7 +745,7 @@ void* text_height( NVGcontext* p_ctx, void* p_script ) {
 // the main script function
 
 //---------------------------------------------------------
-void run_script( GLuint script_id, window_data_t* p_data ) {
+void run_script( GLuint script_id, driver_data_t* p_data ) {
   char buff[200];
 
   // sprintf(buff, "script id: %d", script_id);
