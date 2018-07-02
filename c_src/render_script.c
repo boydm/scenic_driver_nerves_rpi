@@ -107,25 +107,25 @@ functions to play a compiled render script
 // access functions for scripts
 
 
-void delete_script( window_data_t* p_data, GLuint id ) {
+void delete_script( driver_data_t* p_data, GLuint id ) {
   if (p_data->p_scripts[id]) {
     free(p_data->p_scripts[id]);
   p_data->p_scripts[id] = NULL;
   }
 }
 
-void delete_all( window_data_t* p_data ){
+void delete_all( driver_data_t* p_data ){
   for (GLuint i = 0; i < p_data->num_scripts; i++ ) {
     delete_script( p_data, i );
   }
 }
 
-void put_script( window_data_t* p_data, GLuint id, void* p_script ) {
+void put_script( driver_data_t* p_data, GLuint id, void* p_script ) {
   delete_script( p_data, id );
   p_data->p_scripts[id] = p_script;
 }
 
-void* get_script( window_data_t* p_data, GLuint id ) {
+void* get_script( driver_data_t* p_data, GLuint id ) {
   return p_data->p_scripts[id];
 }
 
