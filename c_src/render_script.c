@@ -315,7 +315,7 @@ typedef struct __attribute__((__packed__))
 
 //---------------------------------------------------------
 // run script
-void* internal_run_script( void* p_script, window_data_t* p_data ) {
+void* internal_run_script( void* p_script, driver_data_t* p_data ) {
   GLuint id = *(GLuint*)p_script;
   // char buff[200];
   // sprintf(buff, "run_script %d", id);
