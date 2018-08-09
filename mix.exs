@@ -4,7 +4,7 @@ defmodule ScenicDriverRpi.MixProject do
   def project do
     [
       app: :scenic_driver_rpi,
-      version: "0.1.0",
+      version: "0.7.0",
       package: package(),
       elixir: "~> 1.6",
       description: description(),
