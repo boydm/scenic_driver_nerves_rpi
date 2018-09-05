@@ -84,7 +84,7 @@ defmodule Scenic.Driver.Rpi.Font do
     [
       <<
         @cmd_free_font :: unsigned-integer-size(32)-native,
-        byte_size(name) :: unsigned-integer-size(16)-native,
+        byte_size(name) :: unsigned-integer-size(32)-native,
       >>,
       name
     ]
