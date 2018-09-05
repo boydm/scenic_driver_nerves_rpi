@@ -30,7 +30,7 @@ defmodule Scenic.Driver.Rpi.Port do
   # @cmd_free_tx_id           0x33
   # @cmd_put_tx_id            0x34
 
-  @cmd_crash                0xFE
+  # @cmd_crash                0xFE
 
   @min_window_width         40     
   @min_window_height        20
@@ -46,7 +46,7 @@ defmodule Scenic.Driver.Rpi.Port do
 #define   CMD_PUT_TX_FILE           0x35
 #define   CMD_PUT_TX_RAW            0x36
 
-
+  # import IEx
 
 
   #============================================================================
@@ -66,7 +66,7 @@ defmodule Scenic.Driver.Rpi.Port do
   # all internal functions.
 
   # allocate a display list on the graphics card and pass it's id back up
-  @doc false
+  # @doc false
   # def new_dl_id(port, timeout \\ 600) do
   #   Port.command(port, <<@cmd_new_dl_id>>)
   #   receive do
@@ -87,8 +87,7 @@ defmodule Scenic.Driver.Rpi.Port do
 
   @doc false
   def clear_dl(port, dl_id) do
-    Port.command(
-      port,
+    Port.command(port,
       <<
         @cmd_clear_dl :: unsigned-integer-size(32)-native,
         dl_id :: unsigned-integer-size(32)-native
@@ -98,8 +97,7 @@ defmodule Scenic.Driver.Rpi.Port do
 
   @doc false
   def set_root_dl(port, root_dl) do
-    Port.command(
-      port,
+    Port.command(port,
       <<
         @cmd_set_root_dl :: unsigned-integer-size(32)-native,
         root_dl :: integer-size(32)-native
@@ -220,12 +218,12 @@ defmodule Scenic.Driver.Rpi.Port do
     {:noreply, state}
   end
 
-if Mix.env() == :dev do
-  def handle_cast( :crash, %{port: port} = state) do
-    Port.command(port, <<@cmd_crash :: unsigned-integer-size(32)-native>>)
-    {:noreply, state}
-  end
-end
+# if Mix.env() == :dev do
+#   def handle_cast( :crash, %{port: port} = state) do
+#     Port.command(port, <<@cmd_crash :: unsigned-integer-size(32)-native>>)
+#     {:noreply, state}
+#   end
+# end
 
   def handle_cast( :close, %{port: port} = state) do
     Port.command(port, <<@cmd_close :: unsigned-integer-size(32)-native>>)

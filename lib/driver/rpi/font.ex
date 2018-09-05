@@ -8,7 +8,7 @@ defmodule Scenic.Driver.Rpi.Font do
   alias Scenic.Cache
   require Logger
 
-  import IEx
+  # import IEx
 
   @system_fonts      %{
     "roboto" =>       "/fonts/Roboto/Roboto-Regular.ttf",
@@ -57,7 +57,6 @@ defmodule Scenic.Driver.Rpi.Font do
   #--------------------------------------------------------
   defp load_cache_font( font_key, port ) do
     with {:ok, font_blob} <- Cache.fetch(font_key) do
-
       # send the message to the C driver to load the font
       [
         <<
@@ -85,7 +84,7 @@ defmodule Scenic.Driver.Rpi.Font do
     [
       <<
         @cmd_free_font :: unsigned-integer-size(32)-native,
-        byte_size(name) :: unsigned-integer-size(32)-native,
+        byte_size(name) :: unsigned-integer-size(16)-native,
       >>,
       name
     ]

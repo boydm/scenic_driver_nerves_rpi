@@ -29,6 +29,7 @@ defmodule Scenic.Driver.Rpi.Graph do
     draw_busy: true,
     sync_interval: sync_interval
   } = state ) do
+# IO.puts "flush BUSY"
     # already busy drawing. Try again later.
     # This is similar to skipping a frame
     Process.send_after(self(), :flush_dirty, sync_interval)
@@ -38,7 +39,7 @@ defmodule Scenic.Driver.Rpi.Graph do
   def handle_flush_dirty( %{
     dirty_graphs: dg
   } = state ) do
-
+# IO.puts "flush"
     state = dg
     |> Enum.uniq()
     |> Enum.reverse()
@@ -60,8 +61,33 @@ defmodule Scenic.Driver.Rpi.Graph do
 
 
   #--------------------------------------------------------
-  def handle_cast( {:store_clear_color, clear_color}, %{port: _port} = state) do
-    {:noreply, %{state | clear_color: clear_color} }
+  def handle_cast( :update_clear_color,
+    %{port: port, root_ref: root_key, clear_color: old_clear_color} = state
+  ) do
+    with {:ok, graph} <- ViewPort.Tables.get_graph( root_key ) do
+      root_group = graph[0]
+      clear_color = ((root_group
+          |> Map.get(:styles, %{})
+          |> Map.get(:clear_color)) ||
+        ( root_group
+          |> Map.get(:styles, %{})
+          |> Map.get(:theme, %{})
+          |> Map.get(:background, :black)))
+      |> Primitive.Style.Paint.Color.normalize()
+
+      if clear_color != old_clear_color do
+        # the color has changed. deal with it
+        Port.clear_color(port, clear_color)
+        {:noreply, %{state | clear_color: clear_color}}
+      else
+        # hasn't changed. Don't do anything
+        {:noreply, state }
+      end
+    else
+      _ ->
+        # the graph isn't in the table. don't do anything
+        {:noreply, state }
+    end
   end
 
   #--------------------------------------------------------
@@ -72,22 +98,10 @@ defmodule Scenic.Driver.Rpi.Graph do
 
   #--------------------------------------------------------
   def handle_cast( {:set_root, graph_key}, %{
-    ready: true,
-    port: port
+    ready: true
   } = state ) do
-    # Logger.warn "Rpi set_root #{inspect(graph_key)}"
+    # Logger.warn "Driver set_root #{inspect(graph_key)}"
 
-    # prepare the clear color
-    state = with {:ok, graph} <- ViewPort.Tables.get_graph( graph_key ) do
-      clear_color = graph[0]
-      |> Map.get(:styles, %{})
-      |> Map.get(:clear_color, :black)
-      |> Primitive.Style.ClearColor.normalize()
-      Port.clear_color(port, clear_color)
-      %{state | clear_color: clear_color}
-    else
-      _ -> state
-    end
 
     state = Map.put(state, :root_ref, graph_key)
 
@@ -98,6 +112,9 @@ defmodule Scenic.Driver.Rpi.Graph do
 
     # render immediatly - sets graph_key as the root
     state = render_graphs( keys, state, graph_key )
+
+    # update the clear color
+    GenServer.cast(self(), :update_clear_color)
 
     # {:noreply, %{state | root_ref: graph_key}}
     {:noreply, state}
@@ -289,8 +306,7 @@ defmodule Scenic.Driver.Rpi.Graph do
   defp render_one_graph( driver, graph_key, %{
     port: port,
     dl_map: dl_map,
-    root_ref: root_ref,
-    clear_color: old_clear_color
+    root_ref: root_ref
   } = state ) do
     dl_id = dl_map[graph_key]
 
@@ -298,16 +314,7 @@ defmodule Scenic.Driver.Rpi.Graph do
 
       # if this is the root, check if it has a clear_color set on it.
       if graph_key == root_ref do
-        clear_color = graph[0]
-        |> Map.get(:styles, %{})
-        |> Map.get(:clear_color, :black)
-        |> Primitive.Style.ClearColor.normalize()
-
-        # don't bother sending it if it hasn't changed
-        if clear_color != old_clear_color do
-          Port.clear_color(port, clear_color)
-          GenServer.cast(self(), {:store_clear_color, clear_color})
-        end
+        GenServer.cast(driver, :update_clear_color)
       end
 
       # hack the driver into the state map
