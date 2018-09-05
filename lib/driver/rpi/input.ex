@@ -273,7 +273,7 @@ defmodule Scenic.Driver.Rpi.Input do
 
   #--------------------------------------------------------
   def handle_port_message( other, state ) do
-    pry()
+    # pry()
     { :noreply, state }
   end
 
