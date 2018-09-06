@@ -12,12 +12,12 @@ defmodule Scenic.Driver.Rpi do
 
   require Logger
 
-  import IEx
+  # import IEx
 
   @port  '/scenic_driver_rpi'
 
-  @default_width            -1      # -1 means to use the native width
-  @default_height           -1      # -1 means to use the native height
+  # @default_width            -1      # -1 means to use the native width
+  # @default_height           -1      # -1 means to use the native height
 
   @default_block_size       128
 

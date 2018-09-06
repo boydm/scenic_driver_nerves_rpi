@@ -22,7 +22,7 @@ defmodule Scenic.Driver.Rpi.Input do
   @msg_puts_id              0x02
   @msg_write_id             0x03
   @msg_inspect_id           0x04
-  @msg_reshape_id           0x05
+  # @msg_reshape_id           0x05
   @msg_ready_id             0x06
   @msg_draw_ready_id        0x07
 
@@ -272,7 +272,7 @@ defmodule Scenic.Driver.Rpi.Input do
 
 
   #--------------------------------------------------------
-  def handle_port_message( other, state ) do
+  def handle_port_message( _other, state ) do
     # pry()
     { :noreply, state }
   end
