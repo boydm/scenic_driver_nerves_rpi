@@ -10,7 +10,7 @@ by adding `scenic_driver_nerves_rpi` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:scenic_driver_nerves_rpi, "~> 0.1.0"}
+    {:scenic_driver_nerves_rpi, "~> 0.7"}
   ]
 end
 ```
