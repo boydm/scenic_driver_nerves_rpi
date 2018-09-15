@@ -22,7 +22,7 @@ ifeq ($(CROSSCOMPILE),)
 	DEFAULT_TARGETS = priv
 	endif
 endif
-DEFAULT_TARGETS ?= priv priv/scenic_driver_rpi fonts
+DEFAULT_TARGETS ?= priv priv/scenic_driver_nerves_rpi fonts
 
 # Look for the EI library and header files
 # For crosscompiled builds, ERL_EI_INCLUDE_DIR and ERL_EI_LIBDIR must be
@@ -81,7 +81,7 @@ all: $(DEFAULT_TARGETS)
 priv:
 	mkdir -p priv
 
-priv/scenic_driver_rpi: $(SRCS)
+priv/scenic_driver_nerves_rpi: $(SRCS)
 	mkdir -p priv/$(MIX_ENV)
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 

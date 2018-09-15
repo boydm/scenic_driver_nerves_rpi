@@ -1,9 +1,9 @@
-defmodule ScenicDriverRpi.MixProject do
+defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :scenic_driver_rpi,
+      app: :scenic_driver_nerves_rpi,
       version: "0.7.0",
       package: package(),
       elixir: "~> 1.6",
@@ -28,19 +28,19 @@ defmodule ScenicDriverRpi.MixProject do
   defp deps do
     [
       { :elixir_make, "~> 0.4" },
-      { :scenic, git: "git@github.com:boydm/scenic.git" }
+      { :scenic, git: "~> 0.7" }
     ]
   end
 
   defp description() do
     """
-    Scenic.Driver.Rpi - Scenic driver providing drawing (only) on a Raspberry Pi under Nerves.
+    Scenic.Driver.Nerves.Rpi - Scenic driver providing drawing (only) on a Raspberry Pi under Nerves.
     """
   end
 
   defp package() do
     [
-      name: :scenic_driver_rpi,
+      name: :scenic_driver_nerves_rpi,
       maintainers: ["Boyd Multerer"]
     ]
   end

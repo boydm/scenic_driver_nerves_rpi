@@ -20,7 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-scenic_driver_rpi-*.tar
+scenic_driver_nerves_rpi-*.tar
 
 .DS_Store
 

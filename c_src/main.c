@@ -302,7 +302,7 @@ int main(int argc, char **argv) {
   // super simple arg check
   if ( argc != 3 ) {
     send_puts("Argument check failed!");
-    printf("\r\nscenic_driver_rpi should be launched via the Scenic.Driver.Rpi library.\r\n\r\n");
+    printf("\r\nscenic_driver_nerves_rpi should be launched via the Scenic.Driver.Nerves.Rpi library.\r\n\r\n");
     return 0;
   }
   int num_scripts = atoi(argv[1]);
