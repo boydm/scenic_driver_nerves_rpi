@@ -3,11 +3,11 @@
 #  Copyright © 2018 Kry10 Industries. All rights reserved.
 #
 # a collection of functions for maintaining and drawing graphs. These could have
-# just as well been in Scenic.Driver.Nerves.Rpi itself, but that was getting too long
+# just as well been in Scenic.Driver.Driver itself, but that was getting too long
 # and complicated
 #
 defmodule Scenic.Driver.Nerves.Rpi.Cache do
-  alias Scenic.Driver.Nerves.Rpi
+  alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Cache
 
   # @msg_new_tx_id            0x31
@@ -34,7 +34,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Cache do
       key::binary,
       0::size(8)
     >>
-    |> Rpi.Port.send(port)
+    |> Driver.Port.send(port)
 
     {:noreply, state}
   end
@@ -70,7 +70,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Cache do
       byte_size(pixels)::unsigned-integer-size(32)-native,
       pixels::binary
     >>
-    |> Rpi.Port.send(port)
+    |> Driver.Port.send(port)
   end
 
   # --------------------------------------------------------
@@ -83,6 +83,6 @@ defmodule Scenic.Driver.Nerves.Rpi.Cache do
       0::size(8),
       data::binary
     >>
-    |> Rpi.Port.send(port)
+    |> Driver.Port.send(port)
   end
 end

@@ -4,7 +4,7 @@
 #
 
 defmodule Scenic.Driver.Nerves.Rpi.Font do
-  alias Scenic.Driver.Nerves.Rpi
+  alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Cache
   require Logger
 
@@ -37,7 +37,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Font do
   # --------------------------------------------------------
   defp load_system_font(name, port) do
     path =
-      :code.priv_dir(:scenic_driver_nerves_rpi)
+      :code.priv_dir(:scenic_driver_glfw)
       |> Path.join(@system_fonts[name])
 
     # should probably confirm a hash or something here
@@ -53,23 +53,23 @@ defmodule Scenic.Driver.Nerves.Rpi.Font do
       # null terminate so it can be used directly
       0::size(8)
     >>
-    |> Rpi.Port.send(port)
+    |> Driver.Port.send(port)
   end
 
   # --------------------------------------------------------
   defp load_cache_font(font_key, port) do
     with {:ok, font_blob} <- Cache.fetch(font_key) do
       # send the message to the C driver to load the font
-      [
-        <<
-          @cmd_load_font_blob::unsigned-integer-size(32)-native,
-          byte_size(font_key)::unsigned-integer-size(32)-native,
-          byte_size(font_blob)::unsigned-integer-size(32)-native
-        >>,
-        font_key,
-        font_blob
-      ]
-      |> Rpi.Port.send(port)
+      <<
+        @cmd_load_font_blob::unsigned-integer-size(32)-native,
+        byte_size(font_key) + 1::unsigned-integer-size(32)-native,
+        byte_size(font_blob)::unsigned-integer-size(32)-native,
+        font_key::binary,
+        # null terminate so it can be used directly
+        0::size(8),
+        font_blob::binary
+      >>
+      |> Driver.Port.send(port)
     else
       _ ->
         Logger.error(
@@ -82,13 +82,13 @@ defmodule Scenic.Driver.Nerves.Rpi.Font do
   def free_font(font_name_or_key, port) do
     name = to_string(font_name_or_key)
     # send the message to the C driver to load the font
-    [
-      <<
-        @cmd_free_font::unsigned-integer-size(32)-native,
-        byte_size(name)::unsigned-integer-size(32)-native
-      >>,
-      name
-    ]
-    |> Rpi.Port.send(port)
+    <<
+      @cmd_free_font::unsigned-integer-size(32)-native,
+      byte_size(name) + 1::unsigned-integer-size(16)-native,
+      name::binary,
+      # null terminate so it can be used directly
+      0::size(8)
+    >>
+    |> Driver.Port.send(port)
   end
 end
