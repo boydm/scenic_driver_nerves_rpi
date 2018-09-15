@@ -9,7 +9,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       elixir: "~> 1.6",
       description: description(),
       start_permanent: Mix.env() == :prod,
-      compilers: [:elixir_make] ++ Mix.compilers,
+      compilers: [:elixir_make] ++ Mix.compilers(),
       make_clean: ["clean"],
       make_targets: ["all"],
       make_env: make_env(),
@@ -27,8 +27,8 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      { :elixir_make, "~> 0.4" },
-      { :scenic, "~> 0.7" }
+      {:elixir_make, "~> 0.4"},
+      {:scenic, "~> 0.7"}
     ]
   end
 
@@ -50,12 +50,11 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       nil ->
         %{
           "ERL_EI_INCLUDE_DIR" => "#{:code.root_dir()}/usr/include",
-          "ERL_EI_LIBDIR" => "#{:code.root_dir()}/usr/lib",
+          "ERL_EI_LIBDIR" => "#{:code.root_dir()}/usr/lib"
         }
 
       _ ->
         %{}
     end
   end
-
 end
