@@ -3,11 +3,11 @@
 #  Copyright © 2018 Kry10 Industries. All rights reserved.
 #
 # a collection of functions for maintaining and drawing graphs. These could have
-# just as well been in Scenic.Driver.Nerves.Rpi itself, but that was getting too long
+# just as well been in Scenic.Driver.Driver itself, but that was getting too long
 # and complicated
 #
 defmodule Scenic.Driver.Nerves.Rpi.Graph do
-  alias Scenic.Driver.Nerves.Rpi
+  alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Driver.Nerves.Rpi.Port
   alias Scenic.ViewPort
   alias Scenic.Primitive
@@ -367,7 +367,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Graph do
           @cmd_render_graph::unsigned-integer-size(32)-native,
           dl_id::unsigned-integer-size(32)-native
         >>,
-        Rpi.Compile.graph(graph, graph_key, state)
+        Driver.Compile.graph(graph, graph_key, state)
       ]
       |> Port.send(port)
     else
