@@ -578,6 +578,32 @@ void receive_load_font_file( int* p_msg_length, driver_data_t* p_data ) {
 
 
 //---------------------------------------------------------
+void receive_load_font_blob( int* p_msg_length, driver_data_t* p_data ) {
+  NVGcontext* p_ctx = p_data->p_ctx;
+
+  font_info_t font_info;
+  read_bytes_down( &font_info, sizeof(font_info_t), p_msg_length);
+
+  // create the name and data
+  void* p_name = malloc(font_info.name_length);
+  read_bytes_down( p_name, font_info.name_length, p_msg_length);
+
+  void* p_blob = malloc(font_info.data_length);
+  read_bytes_down( p_blob, font_info.data_length, p_msg_length);
+
+  // only load the font if it is not already loaded!
+  if (nvgFindFont(p_ctx, p_name) < 0) {
+    nvgCreateFontMem(p_ctx, p_name, p_blob, font_info.data_length, true);
+  }
+
+  free(p_name);
+}
+    // case CMD_FREE_FONT:       receive_free_font( &msg_length );               break;
+
+
+
+
+//---------------------------------------------------------
 bool dispatch_message( int msg_length, driver_data_t* p_data ) {
 
   bool render = false;
@@ -609,7 +635,7 @@ bool dispatch_message( int msg_length, driver_data_t* p_data ) {
 
     // font handling
     case CMD_LOAD_FONT_FILE:  receive_load_font_file( &msg_length, p_data );  render = true; break;
-    // case CMD_LOAD_FONT_BLOB:  receive_load_font_blob( &msg_length, p_data );  render = true; break;
+    case CMD_LOAD_FONT_BLOB:  receive_load_font_blob( &msg_length, window );  render = true; break;
     // case CMD_FREE_FONT:       receive_free_font( &msg_length, p_data );       break;
 
     // the next two are in texture.c
