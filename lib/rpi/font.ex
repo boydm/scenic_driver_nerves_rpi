@@ -37,7 +37,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Font do
   # --------------------------------------------------------
   defp load_system_font(name, port) do
     path =
-      :code.priv_dir(:scenic_driver_glfw)
+      :code.priv_dir(:scenic_driver_nerves_rpi)
       |> Path.join(@system_fonts[name])
 
     # should probably confirm a hash or something here
