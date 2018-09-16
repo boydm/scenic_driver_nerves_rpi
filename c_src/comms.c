@@ -635,7 +635,7 @@ bool dispatch_message( int msg_length, driver_data_t* p_data ) {
 
     // font handling
     case CMD_LOAD_FONT_FILE:  receive_load_font_file( &msg_length, p_data );  render = true; break;
-    case CMD_LOAD_FONT_BLOB:  receive_load_font_blob( &msg_length, window );  render = true; break;
+    case CMD_LOAD_FONT_BLOB:  receive_load_font_blob( &msg_length, p_data );  render = true; break;
     // case CMD_FREE_FONT:       receive_free_font( &msg_length, p_data );       break;
 
     // the next two are in texture.c
