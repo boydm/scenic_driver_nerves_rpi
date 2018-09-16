@@ -11,8 +11,8 @@ functions to play a compiled render script
   #include <math.h>
 
   #include <stdlib.h>
-  #include <GLFW/glfw3.h>
-  // #include <GLES2/gl2.h>
+  // #include <GLFW/glfw3.h>
+  #include <GLES2/gl2.h>
 
   #include "nanovg/nanovg.h"
   #include "types.h"
