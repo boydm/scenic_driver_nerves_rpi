@@ -11,8 +11,8 @@ functions to play a compiled render script
   #include <math.h>
 
   #include <stdlib.h>
-  #include <GLFW/glfw3.h>
-  // #include <GLES2/gl2.h>
+  // #include <GLFW/glfw3.h>
+  #include <GLES2/gl2.h>
 
   #include "nanovg/nanovg.h"
   #include "types.h"
@@ -107,25 +107,25 @@ functions to play a compiled render script
 // access functions for scripts
 
 
-void delete_script( window_data_t* p_data, GLuint id ) {
+void delete_script( driver_data_t* p_data, GLuint id ) {
   if (p_data->p_scripts[id]) {
     free(p_data->p_scripts[id]);
   p_data->p_scripts[id] = NULL;
   }
 }
 
-void delete_all( window_data_t* p_data ){
+void delete_all( driver_data_t* p_data ){
   for (GLuint i = 0; i < p_data->num_scripts; i++ ) {
     delete_script( p_data, i );
   }
 }
 
-void put_script( window_data_t* p_data, GLuint id, void* p_script ) {
+void put_script( driver_data_t* p_data, GLuint id, void* p_script ) {
   delete_script( p_data, id );
   p_data->p_scripts[id] = p_script;
 }
 
-void* get_script( window_data_t* p_data, GLuint id ) {
+void* get_script( driver_data_t* p_data, GLuint id ) {
   return p_data->p_scripts[id];
 }
 
@@ -315,7 +315,7 @@ typedef struct __attribute__((__packed__))
 
 //---------------------------------------------------------
 // run script
-void* internal_run_script( void* p_script, window_data_t* p_data ) {
+void* internal_run_script( void* p_script, driver_data_t* p_data ) {
   GLuint id = *(GLuint*)p_script;
   // char buff[200];
   // sprintf(buff, "run_script %d", id);
@@ -367,7 +367,7 @@ void* paint_radial( NVGcontext* p_ctx, void* p_script ) {
   return p_script + sizeof(radial_gradient_t);
 }
 
-void* paint_image( NVGcontext* p_ctx, void* p_script, window_data_t* p_data ) {
+void* paint_image( NVGcontext* p_ctx, void* p_script, driver_data_t* p_data ) {
   image_pattern_t* img = (image_pattern_t*)p_script;
   p_script += sizeof(image_pattern_t);
 
@@ -745,7 +745,7 @@ void* text_height( NVGcontext* p_ctx, void* p_script ) {
 // the main script function
 
 //---------------------------------------------------------
-void run_script( GLuint script_id, window_data_t* p_data ) {
+void run_script( GLuint script_id, driver_data_t* p_data ) {
   char buff[200];
 
   // sprintf(buff, "script id: %d", script_id);
@@ -760,7 +760,7 @@ void run_script( GLuint script_id, window_data_t* p_data ) {
   };
 
   // setup
-  NVGcontext* p_ctx = p_data->context.p_ctx;
+  NVGcontext* p_ctx = p_data->p_ctx;
 
   // get the first op
   GLuint op = *(GLuint*)p_script;

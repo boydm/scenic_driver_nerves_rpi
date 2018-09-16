@@ -9,19 +9,6 @@
 # LDFLAGS	linker flags for linking all binaries
 # ERL_LDFLAGS	additional linker flags for projects referencing Erlang libraries
 
-# Check that we're on a supported build platform
-ifeq ($(CROSSCOMPILE),)
-	# Not crosscompiling, so check that we're on Linux.
-	ifneq ($(shell uname -s),Linux)
-		$(warning nerves_runtime only works on Linux, but crosscompilation)
-		$(warning is supported by defining $$CROSSCOMPILE, $$ERL_EI_INCLUDE_DIR,)
-		$(warning and $$ERL_EI_LIBDIR. See Makefile for details. If using Nerves,)
-		$(warning this should be done automatically.)
-		$(warning .)
-		$(warning Skipping C compilation unless targets explicitly passed to make.)
-	DEFAULT_TARGETS = priv
-	endif
-endif
 DEFAULT_TARGETS ?= priv priv/scenic_driver_nerves_rpi fonts
 
 # Look for the EI library and header files
@@ -38,34 +25,18 @@ endif
 
 # Set Erlang-specific compile and linker flags
 ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
-ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR) -lei 
-
+ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR) -lei
 
 #-L/opt/vc/lib -lVCOS
 # LDFLAGS += -lbcm_host -lmnl -lEGL -lGLESv2 -lm-lvcos
 LDFLAGS += -lGLESv2 -lEGL -lm -lbcm_host -lvchostif
 
-
 CFLAGS ?= -O2 -Wall -Wextra -Wno-unused-parameter -pedantic
-CC ?= $(CROSSCOMPILE)-gcc
 
 # Enable for debug messages
 # CFLAGS += -DDEBUG
 
 CFLAGS += -std=gnu99
-
-ifeq ($(origin CROSSCOMPILE), undefined)
-SUDO_ASKPASS ?= /usr/bin/ssh-askpass
-SUDO ?= sudo
-
-# If not cross-compiling, then run sudo and suid the port binary
-# so that it's possible to debug
-update_perms = \
-	SUDO_ASKPASS=$(SUDO_ASKPASS) $(SUDO) -- sh -c 'chown root:root $(1); chmod +s $(1)'
-else
-# If cross-compiling, then permissions need to be set some build system-dependent way
-update_perms =
-endif
 
 SRCS = c_src/main.c c_src/comms.c c_src/nanovg/nanovg.c \
 	c_src/render_script.c c_src/tx.c c_src/utils.c
@@ -73,7 +44,7 @@ SRCS = c_src/main.c c_src/comms.c c_src/nanovg/nanovg.c \
 
 .PHONY: all clean
 
-all: $(DEFAULT_TARGETS) 
+all: $(DEFAULT_TARGETS)
 
 %.o: %.c
 	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
@@ -81,8 +52,7 @@ all: $(DEFAULT_TARGETS)
 priv:
 	mkdir -p priv
 
-priv/scenic_driver_nerves_rpi: $(SRCS)
-	mkdir -p priv/$(MIX_ENV)
+priv/scenic_driver_nerves_rpi: priv $(SRCS)
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
 fonts: priv/
