@@ -8,6 +8,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       package: package(),
       elixir: "~> 1.6",
       description: description(),
+      build_embedded: true,
       start_permanent: Mix.env() == :prod,
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_clean: ["clean"],
