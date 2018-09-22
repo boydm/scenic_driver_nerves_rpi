@@ -215,7 +215,7 @@ int read_msg_length(struct timeval *ptv) {
 
 //---------------------------------------------------------
 bool read_bytes_down( void* p_buff, int bytes_to_read, int* p_bytes_to_remaining) {
-  if ( p_bytes_to_remaining <= 0 ) return false;
+  if (!p_bytes_to_remaining) return false;
   if (bytes_to_read > *p_bytes_to_remaining){
     // read in the remaining bytes
     read_exact(p_buff, *p_bytes_to_remaining);
@@ -413,7 +413,7 @@ typedef struct __attribute__((__packed__))
 } msg_draw_ready_t;
 
 void send_draw_ready( unsigned int id ) {
-  msg_ready_t  msg = { MSG_OUT_DRAW_READY, id };
+  msg_draw_ready_t  msg = { MSG_OUT_DRAW_READY, id};
   write_cmd( (byte*)&msg, sizeof(msg_draw_ready_t) );
 }
 
@@ -433,7 +433,6 @@ typedef struct __attribute__((__packed__))
 } msg_stats_t;
 void receive_query_stats( driver_data_t* p_data ) {
   msg_stats_t   msg;
-  int32_t       a,b;
 
   msg.msg_id = MSG_OUT_STATS;
   // msg.input_flags = p_data->input_flags;
