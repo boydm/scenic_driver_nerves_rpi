@@ -5,7 +5,7 @@
 # a collection of functions for handling port specific messages
 #
 defmodule Scenic.Driver.Nerves.Rpi.Port do
-  #  alias Scenic.Driver.Nerves.Rpi
+  @moduledoc false
 
   @msg_stats_id 0x01
 

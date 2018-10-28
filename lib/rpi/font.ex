@@ -4,6 +4,7 @@
 #
 
 defmodule Scenic.Driver.Nerves.Rpi.Font do
+  @moduledoc false
   alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Cache
   require Logger

@@ -8,6 +8,7 @@
 #
 
 defmodule Scenic.Driver.Nerves.Rpi.Compile do
+  @moduledoc false
   alias Scenic.Primitive
 
   require Logger

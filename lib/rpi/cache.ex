@@ -7,6 +7,7 @@
 # and complicated
 #
 defmodule Scenic.Driver.Nerves.Rpi.Cache do
+  @moduledoc false
   alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Cache
 

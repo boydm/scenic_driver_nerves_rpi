@@ -5,6 +5,7 @@
 # a collection of functions for handling messages from the port
 #
 defmodule Scenic.Driver.Nerves.Rpi.Input do
+  @moduledoc false
   use Bitwise
 
   alias Scenic.Driver.Nerves.Rpi.Cache

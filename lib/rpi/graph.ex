@@ -7,6 +7,7 @@
 # and complicated
 #
 defmodule Scenic.Driver.Nerves.Rpi.Graph do
+  @moduledoc false
   alias Scenic.Driver.Nerves.Rpi, as: Driver
   alias Scenic.Driver.Nerves.Rpi.Port
   alias Scenic.ViewPort
