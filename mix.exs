@@ -4,7 +4,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   def project do
     [
       app: :scenic_driver_nerves_rpi,
-      version: "0.7.0",
+      version: "0.9.0",
       package: package(),
       elixir: "~> 1.6",
       description: description(),
@@ -29,7 +29,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.4", runtime: false},
-      {:scenic, "~> 0.7"}
+      {:scenic, git: "git@github.com:boydm/scenic.git"}
     ]
   end
 
