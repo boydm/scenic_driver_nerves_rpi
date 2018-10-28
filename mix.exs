@@ -1,11 +1,14 @@
 defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   use Mix.Project
 
+  @app_name :scenic_driver_nerves_rpi
+  @version "0.9.0"
+  @github "https://github.com/boydm/scenic_driver_nerves_rpi"
+
   def project do
     [
-      app: :scenic_driver_nerves_rpi,
-      version: "0.9.0",
-      package: package(),
+      app: @app_name,
+      version: @version,
       elixir: "~> 1.6",
       description: description(),
       build_embedded: true,
@@ -14,7 +17,9 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       make_clean: ["clean"],
       make_targets: ["all"],
       make_env: make_env(),
-      deps: deps()
+      deps: deps(),
+      package: package(),
+      docs: [extras: ["README.md"]]
     ]
   end
 
@@ -28,8 +33,9 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:scenic, "~> 0.9"},
       {:elixir_make, "~> 0.4", runtime: false},
-      {:scenic, "~> 0.9"}
+      {:ex_doc, "~> 0.19", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -37,13 +43,6 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
     """
     Scenic.Driver.Nerves.Rpi - Scenic driver providing drawing (only) on a Raspberry Pi under Nerves.
     """
-  end
-
-  defp package() do
-    [
-      name: :scenic_driver_nerves_rpi,
-      maintainers: ["Boyd Multerer"]
-    ]
   end
 
   defp make_env() do
@@ -58,4 +57,24 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
         %{}
     end
   end
+
+  defp package do
+    [
+      name: @app_name,
+      contributors: ["Boyd Multerer"],
+      maintainers: ["Boyd Multerer"],
+      licenses: ["Apache 2"],
+      links: %{Github: @github},
+      files: [
+        "Makefile",
+        "LICENSE",
+        # only include *.c and *.h files
+        "c_src/**/*.[ch]",
+        # only include *.ex files
+        "lib/**/*.ex",
+        "mix.exs"
+      ]
+    ]
+  end
+
 end
