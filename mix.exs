@@ -29,7 +29,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.4", runtime: false},
-      {:scenic, git: "git@github.com:boydm/scenic.git"}
+      {:scenic, "~> 0.9"}
     ]
   end
 
