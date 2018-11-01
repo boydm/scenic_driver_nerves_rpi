@@ -13,7 +13,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       description: description(),
       build_embedded: true,
       start_permanent: Mix.env() == :prod,
-      compilers: [:elixir_make] ++ Mix.compilers(),
+      compilers: compilers(),
       make_clean: ["clean"],
       make_targets: ["all"],
       make_env: make_env(),
@@ -56,6 +56,18 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       _ ->
         %{}
     end
+  end
+
+  defp compilers() do
+    compilers(System.get_env("PUBLISH"))
+  end
+
+  defp compilers(nil) do
+    [:elixir_make] ++ Mix.compilers()
+  end
+
+  defp compilers(_publish) do
+    Mix.compilers()
   end
 
   defp package do
