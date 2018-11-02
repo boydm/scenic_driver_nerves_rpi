@@ -87,12 +87,13 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   p_data->major_version = major_version;
   p_data->minor_version = minor_version;
 
+
   // prepare an appropriate EGL frame buffer configuration request
   static const EGLint attribute_list[] = {
-    EGL_RED_SIZE, 5,
-    EGL_GREEN_SIZE, 6,
-    EGL_BLUE_SIZE, 5,
-    EGL_ALPHA_SIZE, 0,
+    EGL_RED_SIZE, 8,
+    EGL_GREEN_SIZE, 8,
+    EGL_BLUE_SIZE, 8,
+    EGL_ALPHA_SIZE, 8,
     EGL_STENCIL_SIZE, 1,
     EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
     EGL_NONE
