@@ -4,7 +4,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # note to self: to publish set PUBLISH=1 on command line
 
   @app_name :scenic_driver_nerves_rpi
-  @version "0.9.1"
+  @version "0.9.2"
   @github "https://github.com/boydm/scenic_driver_nerves_rpi"
 
   def project do
@@ -86,7 +86,8 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
         "c_src/**/*.[ch]",
         # only include *.ex files
         "lib/**/*.ex",
-        "mix.exs"
+        "mix.exs",
+        "priv/*"
       ]
     ]
   end
