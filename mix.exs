@@ -4,7 +4,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # note to self: to publish set PUBLISH=1 on command line
 
   @app_name :scenic_driver_nerves_rpi
-  @version "0.9.2"
+  @version "0.9.3"
   @github "https://github.com/boydm/scenic_driver_nerves_rpi"
 
   def project do
