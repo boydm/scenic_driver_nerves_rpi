@@ -4,7 +4,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # note to self: to publish set PUBLISH=1 on command line
 
   @app_name :scenic_driver_nerves_rpi
-  @version "0.9.3"
+  @version "0.10.0"
   @github "https://github.com/boydm/scenic_driver_nerves_rpi"
 
   def project do
@@ -35,8 +35,9 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:scenic, "~> 0.9"},
-      {:elixir_make, "~> 0.4", runtime: false},
+      # {:scenic, "~> 0.10"},
+      {:scenic, git: "https://github.com/boydm/scenic.git"},
+      {:elixir_make, "~> 0.5", runtime: false},
       {:ex_doc, "~> 0.19", only: [:dev, :test], runtime: false}
     ]
   end
@@ -91,5 +92,4 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       ]
     ]
   end
-
 end

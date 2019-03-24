@@ -19,7 +19,8 @@ void send_puts( const char* msg );
 void send_write( const char* msg );
 void send_inspect( void* data, int length );
 
-void send_cache_miss( const char* key );
+void send_static_texture_miss(const char* key);
+void send_dynamic_texture_miss(const char* key);
 void send_font_miss( const char* key );
 void send_key(int key, int scancode, int action, int mods);
 void send_codepoint(unsigned int codepoint, int mods);
