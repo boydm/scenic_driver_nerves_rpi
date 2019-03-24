@@ -41,7 +41,6 @@ defmodule Scenic.Driver.Nerves.Rpi.Input do
 
   @debounce_speed 16
 
-  
   # ============================================================================
   # debounce input
 

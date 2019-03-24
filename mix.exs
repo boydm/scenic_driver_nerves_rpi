@@ -91,5 +91,4 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
       ]
     ]
   end
-
 end

@@ -143,7 +143,6 @@ defmodule Scenic.Driver.Nerves.Rpi.Compile do
         |> op_paint_dynamic(image, ox, oy, ex, ey, angle, alpha)
         |> op_fill_paint()
 
-
       _ ->
         ops
     end
