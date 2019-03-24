@@ -33,8 +33,9 @@ functions to play a compiled render script
   #define OP_PAINT_BOX               0X07
   #define OP_PAINT_RADIAL            0X08
   #define OP_PAINT_IMAGE             0X09
+  #define OP_PAINT_DYNAMIC           0X0A
 
-  #define OP_ANTI_ALIAS              0X0A
+//  #define OP_ANTI_ALIAS              0X0A
 
   #define OP_STROKE_WIDTH            0X0C
   #define OP_STROKE_COLOR            0X0D
@@ -378,7 +379,7 @@ void* paint_image( NVGcontext* p_ctx, void* p_script, driver_data_t* p_data ) {
 
   // if the id is -1, then it isn't loaded
   if ( id < 0 ) {
-    send_cache_miss( p_script );
+    send_static_texture_miss( p_script );
   } else {
 
     // if ox, oy, ex, ey are all zero, then use the
@@ -405,6 +406,45 @@ void* paint_image( NVGcontext* p_ctx, void* p_script, driver_data_t* p_data ) {
   return p_script + img->key_size;
 }
 
+void* paint_dynamic(NVGcontext* p_ctx, void* p_script, driver_data_t* p_data)
+{
+  image_pattern_t* img = (image_pattern_t*) p_script;
+  p_script += sizeof(image_pattern_t);
+
+  float alpha = (float) img->alpha / 255.0;
+
+  // get the image id from the hash.
+  int id = get_tx_id(p_data->p_tx_ids, p_script);
+
+  // if the id is -1, then it isn't loaded
+  if (id < 0)
+  {
+    send_dynamic_texture_miss(p_script);
+  }
+  else
+  {
+
+    // if ox, oy, ex, ey are all zero, then use the
+    // natural h/w of the image
+    float ox = img->ox;
+    float oy = img->oy;
+    float ex = img->ex;
+    float ey = img->ey;
+    if (ox == 0.0 && oy == 0.0 && ex == 0.0 && ey == 0.0)
+    {
+      int w, h;
+      nvgImageSize(p_ctx, id, &w, &h);
+      ex = w;
+      ey = h;
+    }
+
+    // the id is loaded and found
+    current_paint =
+        nvgImagePattern(p_ctx, ox, oy, ex, ey, img->angle, id, alpha);
+  }
+
+  return p_script + img->key_size;
+}
 
 //---------------------------------------------------------
 // render styles
@@ -789,9 +829,14 @@ void run_script( GLuint script_id, driver_data_t* p_data ) {
       case OP_PAINT_LINEAR:             p_script = paint_linear( p_ctx, p_script ); break;
       case OP_PAINT_BOX:                p_script = paint_box( p_ctx, p_script ); break;
       case OP_PAINT_RADIAL:             p_script = paint_radial( p_ctx, p_script ); break;
-      case OP_PAINT_IMAGE:              p_script = paint_image( p_ctx, p_script, p_data ); break;
+      case OP_PAINT_IMAGE:
+        p_script = paint_image(p_ctx, p_script, p_data);
+        break;
+      case OP_PAINT_DYNAMIC:
+        p_script = paint_dynamic(p_ctx, p_script, p_data);
+        break;
 
-      case OP_ANTI_ALIAS:               p_script = shape_anti_alias( p_ctx, p_script ); break;
+      // case OP_ANTI_ALIAS:               p_script = shape_anti_alias( p_ctx, p_script ); break;
 
       case OP_STROKE_WIDTH:             p_script = shape_width( p_ctx, p_script ); break;
       case OP_STROKE_COLOR:             p_script = stroke_color( p_ctx, p_script ); break;

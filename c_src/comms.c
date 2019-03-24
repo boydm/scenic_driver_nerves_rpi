@@ -43,7 +43,8 @@ The caller will typically be erlang, so use the 2-byte length indicator
 #define   MSG_OUT_MOUSE_SCROLL      0x0E
 #define   MSG_OUT_CURSOR_ENTER      0x0F
 #define   MSG_OUT_DROP_PATHS        0x10
-#define   MSG_OUT_CACHE_MISS        0x20
+#define   MSG_OUT_STATIC_TEXTURE_MISS 0x20
+#define   MSG_OUT_DYNAMIC_TEXTURE_MISS 0x21
 
 #define   MSG_OUT_FONT_MISS         0x22
 
@@ -272,18 +273,34 @@ void send_inspect( void* data, int length ) {
   write_exact(data, length);
 }
 
-
 //---------------------------------------------------------
-void send_cache_miss( const char* key ) {
+void send_static_texture_miss(const char* key)
+{
   uint32_t msg_len = strlen(key);
   uint32_t cmd_len = msg_len + sizeof(uint32_t);
-  uint32_t cmd = MSG_OUT_CACHE_MISS;
+  uint32_t cmd     = MSG_OUT_STATIC_TEXTURE_MISS;
 
-  if (f_little_endian) cmd_len = SWAP_UINT32(cmd_len);
+  if (f_little_endian)
+    cmd_len = SWAP_UINT32(cmd_len);
 
-  write_exact((byte*)&cmd_len, sizeof(uint32_t));
-  write_exact((byte*)&cmd, sizeof(uint32_t));
-  write_exact((byte*)key, msg_len);
+  write_exact((byte*) &cmd_len, sizeof(uint32_t));
+  write_exact((byte*) &cmd, sizeof(uint32_t));
+  write_exact((byte*) key, msg_len);
+}
+
+//---------------------------------------------------------
+void send_dynamic_texture_miss(const char* key)
+{
+  uint32_t msg_len = strlen(key);
+  uint32_t cmd_len = msg_len + sizeof(uint32_t);
+  uint32_t cmd     = MSG_OUT_DYNAMIC_TEXTURE_MISS;
+
+  if (f_little_endian)
+    cmd_len = SWAP_UINT32(cmd_len);
+
+  write_exact((byte*) &cmd_len, sizeof(uint32_t));
+  write_exact((byte*) &cmd, sizeof(uint32_t));
+  write_exact((byte*) key, msg_len);
 }
 
 //---------------------------------------------------------
