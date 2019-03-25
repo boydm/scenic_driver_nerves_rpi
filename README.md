@@ -11,7 +11,7 @@ regarding multi-touch.
 In your Nerves applications dependencies include the following line
 
     ...
-    {:scenic_driver_nerves_rpi, , "~> 0.9"}
+    {:scenic_driver_nerves_rpi, , "~> 0.10"}
     ...
 
 ## Configuration
