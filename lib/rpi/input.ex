@@ -23,7 +23,7 @@ defmodule Scenic.Driver.Nerves.Rpi.Input do
   @msg_puts_id 0x02
   @msg_write_id 0x03
   @msg_inspect_id 0x04
-  @msg_reshape_id 0x05
+  # @msg_reshape_id 0x05
   @msg_ready_id 0x06
   @msg_draw_ready_id 0x07
 
