@@ -35,8 +35,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:scenic, "~> 0.10"},
-      {:scenic, git: "https://github.com/boydm/scenic.git"},
+      {:scenic, "~> 0.10"},
       {:elixir_make, "~> 0.5", runtime: false},
       {:ex_doc, "~> 0.19", only: [:dev, :test], runtime: false}
     ]
@@ -88,7 +87,8 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
         # only include *.ex files
         "lib/**/*.ex",
         "mix.exs",
-        "priv/*"
+        "priv/**/*.txt",
+        "priv/**/*.ttf.*"
       ]
     ]
   end
