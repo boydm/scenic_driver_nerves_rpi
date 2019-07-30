@@ -26,9 +26,6 @@ scenic_driver_nerves_rpi-*.tar
 
 *.log
 
-# ignore everything in priv
-/priv
-
 # ignore office temp files
 ~*.xlsx
 

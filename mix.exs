@@ -36,7 +36,7 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
   defp deps do
     [
       {:scenic, "~> 0.10"},
-      {:elixir_make, "~> 0.5", runtime: false},
+      {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, "~> 0.19", only: [:dev, :test], runtime: false}
     ]
   end

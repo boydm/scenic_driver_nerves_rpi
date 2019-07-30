@@ -9,8 +9,9 @@
 # LDFLAGS	linker flags for linking all binaries
 # ERL_LDFLAGS	additional linker flags for projects referencing Erlang libraries
 
-DEFAULT_TARGETS ?= priv priv/scenic_driver_nerves_rpi
-# fonts
+PREFIX = $(MIX_APP_PATH)/priv
+
+DEFAULT_TARGETS ?= $(PREFIX) $(PREFIX)/scenic_driver_nerves_rpi $(PREFIX)/fonts
 
 # Look for the EI library and header files
 # For crosscompiled builds, ERL_EI_INCLUDE_DIR and ERL_EI_LIBDIR must be
@@ -42,22 +43,21 @@ CFLAGS += -std=gnu99
 SRCS = c_src/main.c c_src/comms.c c_src/nanovg/nanovg.c \
 	c_src/render_script.c c_src/tx.c c_src/utils.c
 
-
-.PHONY: all clean
+calling_from_make:
+	mix compile
 
 all: $(DEFAULT_TARGETS)
 
-%.o: %.c
-	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
+$(PREFIX):
+	mkdir -p $@
 
-priv:
-	mkdir -p priv
-
-priv/scenic_driver_nerves_rpi: priv $(SRCS)
+$(PREFIX)/scenic_driver_nerves_rpi: $(SRCS)
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
-# fonts: priv/
-# 	rsync -rupE fonts priv/
+$(PREFIX)/fonts: fonts
+	rsync -rupE $< $@
 
 clean:
-	$(RM) -rf priv/dev priv/test priv/prod src/*.o
+	$(RM) -rf $(PREFIX)
+
+.PHONY: all clean calling_from_make
