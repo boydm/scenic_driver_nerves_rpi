@@ -1,3 +1,6 @@
+## 0.10.1
+* fix build products to work with elixir_make 0.6.  Thank you @fhunleth
+
 ## 0.10.0
 * update stb_truetype and stb_image to latest
 * take minor updates from nanovg
