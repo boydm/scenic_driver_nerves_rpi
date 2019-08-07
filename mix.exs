@@ -87,8 +87,8 @@ defmodule Scenic.Driver.Nerves.Rpi.MixProject do
         # only include *.ex files
         "lib/**/*.ex",
         "mix.exs",
-        "priv/**/*.txt",
-        "priv/**/*.ttf.*"
+        "fonts/**/*.txt",
+        "fonts/**/*.ttf.*"
       ]
     ]
   end
