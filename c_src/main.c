@@ -19,6 +19,13 @@
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <linux/fb.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
 
 #define NANOVG_GLES2_IMPLEMENTATION
 #include "nanovg/nanovg.h"
@@ -32,6 +39,8 @@
 
 #define DEFAULT_SCREEN    0
 
+#define VCFBCP_INITIALIZED 0xCA5E
+
 typedef struct {
   EGLDisplay display;
   EGLConfig config;
@@ -42,6 +51,16 @@ typedef struct {
   int major_version;
   int minor_version;
   NVGcontext* p_ctx;
+  DISPMANX_DISPLAY_HANDLE_T dispman_display;
+
+  // State for the framebuffer copier. Note that this is only
+  // valid after you called init_vcfbcp!
+  DISPMANX_RESOURCE_HANDLE_T vcfbcp_screen_resource;
+  struct fb_var_screeninfo vcfbcp_vinfo;
+  VC_RECT_T vcfbcp_rect;
+  int vcfbcp_fbfd;
+  char *vcfbcp_fbp;
+  int vcfbcp_initialized;
 } egl_data_t;
 
 #define   MSG_OUT_PUTS              0x02
@@ -145,7 +164,7 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
     dst_rect.height = screen_height / 2;
   } else {
     dst_rect.width = screen_width;
-    dst_rect.height = screen_height;    
+    dst_rect.height = screen_height;
   }
 
   src_rect.x = 0;
@@ -156,12 +175,13 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   // start the display manager
   DISPMANX_DISPLAY_HANDLE_T dispman_display = vc_dispmanx_display_open(0 /* LCD */);
   dispman_update = vc_dispmanx_update_start(0 /* LCD */);
+  p_data->dispman_display = dispman_display;
 
 
   // create the screen element (will be full-screen)
   VC_DISPMANX_ALPHA_T alpha =
   {
-      DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS, 
+      DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
       255, /*alpha 0->255*/
       0
   };
@@ -200,8 +220,8 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   glViewport(0, 0, screen_width, screen_height);
 
   // This turns on/off depth test.
-  // With this ON, whatever we draw FIRST is 
-  // "on top" and each subsequent draw is BELOW 
+  // With this ON, whatever we draw FIRST is
+  // "on top" and each subsequent draw is BELOW
   // the draw calls before it.
   // With this OFF, whatever we draw LAST is
   // "on top" and each subsequent draw is ABOVE
@@ -216,7 +236,7 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   // turning this on when we have a primitive with a
   // style that has an alpha channel != 1.0f but we
   // don't have code to detect that.  Easy to do if we need it!
-  glEnable (GL_BLEND); 
+  glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
@@ -281,16 +301,86 @@ void test_draw(egl_data_t* p_data) {
 // business. If it closes, then return false
 // http://pubs.opengroup.org/onlinepubs/7908799/xsh/poll.html
 // see https://stackoverflow.com/questions/25147181/pollhup-vs-pollnval-or-what-is-pollhup
-bool isCallerDown() 
+bool isCallerDown()
 {
     struct pollfd ufd;
     memset(&ufd, 0, sizeof ufd);
     ufd.fd = STDIN_FILENO;
     ufd.events = POLLIN;
-    if ( poll(&ufd, 1, 0) < 0 ) 
+    if ( poll(&ufd, 1, 0) < 0 )
         return true;
     return ufd.revents & POLLHUP;
 }
+
+//---------------------------------------------------------------
+// Code originally from https://github.com/tasanakorn/rpi-fbcp
+// Note that faster/more complex variants exist (Adafruit has one
+// that checks the minim rectangle to be copied), but for standard
+// embedded displays low framerates shouldn't be bad. Feel free to
+// disagree and send patches ;-)
+
+// https://github.com/adafruit/rpi-fbcp/blob/master/main.c has a
+// more advanced solution
+
+// One-time initialization of the copying process. This opens files, sets
+// up one-time variables, and basically readies us for the tight-loop (once
+// per frame) stuff. Returns 0 on success, -1 on error.
+int init_vcfbcp(egl_data_t *egl_data) {
+  struct fb_fix_screeninfo finfo;
+  uint32_t image_prt;
+
+  egl_data->vcfbcp_fbfd = open("/dev/fb1", O_RDWR);
+  if (egl_data->vcfbcp_fbfd == -1) {
+    fprintf(stderr, "Unable to open secondary display, won't do framebuffer copying.\n");
+    fprintf(stderr, "This is fine if you only want to drive an HDMI display\n");
+    return 0;
+  }
+  if (ioctl(egl_data->vcfbcp_fbfd, FBIOGET_FSCREENINFO, &finfo)) {
+    fprintf(stderr, "Unable to get secondary display information\n");
+    return -1;
+  }
+  if (ioctl(egl_data->vcfbcp_fbfd, FBIOGET_VSCREENINFO, &egl_data->vcfbcp_vinfo)) {
+    fprintf(stderr, "Unable to get secondary display information\n");
+    return -1;
+  }
+
+  fprintf(stderr, "SPI Display screen size is %d by %d, bpp=%d\n", egl_data->vcfbcp_vinfo.xres, egl_data->vcfbcp_vinfo.yres, egl_data->vcfbcp_vinfo.bits_per_pixel);
+
+  egl_data->vcfbcp_screen_resource = vc_dispmanx_resource_create(VC_IMAGE_RGB565, egl_data->vcfbcp_vinfo.xres, egl_data->vcfbcp_vinfo.yres, &image_prt);
+  if (!egl_data->vcfbcp_screen_resource) {
+    fprintf(stderr, "Unable to create screen buffer\n");
+    close(egl_data->vcfbcp_fbfd);
+    return -1;
+  }
+
+  egl_data->vcfbcp_fbp = (char*) mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED,
+                                      egl_data->vcfbcp_fbfd, 0);
+  if (egl_data->vcfbcp_fbp <= 0) {
+    fprintf(stderr, "Unable to create mamory mapping\n");
+    close(egl_data->vcfbcp_fbfd);
+    vc_dispmanx_resource_delete(egl_data->vcfbcp_screen_resource);
+    return -1;
+  }
+
+  vc_dispmanx_rect_set(&egl_data->vcfbcp_rect, 0, 0, egl_data->vcfbcp_vinfo.xres, egl_data->vcfbcp_vinfo.yres);
+
+  egl_data->vcfbcp_initialized = VCFBCP_INITIALIZED; // zee magic cookie
+  return 0;
+}
+
+// Copies current frame to secondary display. Returns -1 on trouble.
+int vcfbcp_copy(egl_data_t *egl_data) {
+  if (egl_data->vcfbcp_initialized != VCFBCP_INITIALIZED) {
+    return 0; // We probably don't have a secondary display. That's fine.
+  }
+
+  vc_dispmanx_snapshot(egl_data->dispman_display, egl_data->vcfbcp_screen_resource, 0);
+  vc_dispmanx_resource_read_data(egl_data->vcfbcp_screen_resource, &egl_data->vcfbcp_rect, egl_data->vcfbcp_fbp,
+                                 egl_data->vcfbcp_vinfo.xres * egl_data->vcfbcp_vinfo.bits_per_pixel / 8);
+  return 0;
+}
+
+
 
 //---------------------------------------------------------
 int main(int argc, char **argv) {
@@ -310,6 +400,7 @@ int main(int argc, char **argv) {
 
   // init graphics
   init_video_core( &egl_data, debug_mode );
+  init_vcfbcp( &egl_data );
 
   // set up the scripts table
   memset(&data, 0, sizeof(driver_data_t));
@@ -344,6 +435,9 @@ int main(int argc, char **argv) {
       eglSwapBuffers(egl_data.display, egl_data.surface);
     }
 
+    // in case we have two framebuffers, now is the time to sync them
+    vcfbcp_copy(&egl_data);
+
     // wait for events - timeout is in seconds
     // the timeout is the max time the app will stay alive
     // after the host BEAM environment shuts down.
@@ -355,8 +449,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
-
-
-
-
