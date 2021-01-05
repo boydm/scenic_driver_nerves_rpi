@@ -89,6 +89,10 @@ defmodule Scenic.Driver.Nerves.Rpi do
 
   @default_clear_color {0, 0, 0, 0xFF}
 
+  @default_layer 0
+
+  @default_global_opacity 255
+
   # ============================================================================
   # client callable api
 
@@ -127,7 +131,19 @@ defmodule Scenic.Driver.Nerves.Rpi do
         _ -> @default_debug
       end
 
-    port_args = to_charlist(" #{dl_block_size} #{debug_mode}")
+    layer =
+      cond do
+        is_integer(config[:layer]) -> config[:layer]
+        true -> @default_layer
+      end
+
+    global_opacity =
+      cond do
+        is_integer(config[:global_opacity]) -> config[:global_opacity]
+        true -> @default_global_opacity
+      end
+
+    port_args = to_charlist(" #{dl_block_size} #{debug_mode} #{layer} #{global_opacity}")
 
     # request put and delete notifications from the cache
     Cache.Static.Font.subscribe(:all)
@@ -167,7 +183,8 @@ defmodule Scenic.Driver.Nerves.Rpi do
 
       # window:         { width, height },
       screen_factor: 1.0,
-      viewport: viewport
+      viewport: viewport,
+      layer: layer
     }
 
     {:ok, state}

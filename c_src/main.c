@@ -48,7 +48,7 @@ typedef struct {
 
 //---------------------------------------------------------
 // setup the video core
-void init_video_core( egl_data_t* p_data, int debug_mode ) {
+void init_video_core( egl_data_t* p_data, int debug_mode, int layer, int global_opacity ) {
   int screen_width, screen_height;
 
   // initialize the bcm_host from broadcom
@@ -145,7 +145,7 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
     dst_rect.height = screen_height / 2;
   } else {
     dst_rect.width = screen_width;
-    dst_rect.height = screen_height;    
+    dst_rect.height = screen_height;
   }
 
   src_rect.x = 0;
@@ -161,12 +161,12 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   // create the screen element (will be full-screen)
   VC_DISPMANX_ALPHA_T alpha =
   {
-      DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS, 
-      255, /*alpha 0->255*/
+      DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
+      global_opacity, /*alpha 0->255*/
       0
   };
   DISPMANX_ELEMENT_HANDLE_T dispman_element = vc_dispmanx_element_add (dispman_update, dispman_display,
-  0/*layer*/, &dst_rect, 0/*src*/,
+  layer, &dst_rect, 0/*src*/,
   &src_rect, DISPMANX_PROTECTION_NONE, &alpha, 0/*clamp*/, 0/*transform*/);
   result = vc_dispmanx_update_submit_sync(dispman_update);
   if (result != 0) {
@@ -200,8 +200,8 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   glViewport(0, 0, screen_width, screen_height);
 
   // This turns on/off depth test.
-  // With this ON, whatever we draw FIRST is 
-  // "on top" and each subsequent draw is BELOW 
+  // With this ON, whatever we draw FIRST is
+  // "on top" and each subsequent draw is BELOW
   // the draw calls before it.
   // With this OFF, whatever we draw LAST is
   // "on top" and each subsequent draw is ABOVE
@@ -216,7 +216,7 @@ void init_video_core( egl_data_t* p_data, int debug_mode ) {
   // turning this on when we have a primitive with a
   // style that has an alpha channel != 1.0f but we
   // don't have code to detect that.  Easy to do if we need it!
-  glEnable (GL_BLEND); 
+  glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
@@ -281,13 +281,13 @@ void test_draw(egl_data_t* p_data) {
 // business. If it closes, then return false
 // http://pubs.opengroup.org/onlinepubs/7908799/xsh/poll.html
 // see https://stackoverflow.com/questions/25147181/pollhup-vs-pollnval-or-what-is-pollhup
-bool isCallerDown() 
+bool isCallerDown()
 {
     struct pollfd ufd;
     memset(&ufd, 0, sizeof ufd);
     ufd.fd = STDIN_FILENO;
     ufd.events = POLLIN;
-    if ( poll(&ufd, 1, 0) < 0 ) 
+    if ( poll(&ufd, 1, 0) < 0 )
         return true;
     return ufd.revents & POLLHUP;
 }
@@ -300,16 +300,18 @@ int main(int argc, char **argv) {
   test_endian();
 
   // super simple arg check
-  if ( argc != 3 ) {
+  if ( argc != 5 ) {
     send_puts("Argument check failed!");
     printf("\r\nscenic_driver_nerves_rpi should be launched via the Scenic.Driver.Nerves.Rpi library.\r\n\r\n");
     return 0;
   }
   int num_scripts = atoi(argv[1]);
   int debug_mode = atoi(argv[2]);
+  int layer = atoi(argv[3]);
+  int global_opacity = atoi(argv[4]);
 
   // init graphics
-  init_video_core( &egl_data, debug_mode );
+  init_video_core( &egl_data, debug_mode, layer, global_opacity );
 
   // set up the scripts table
   memset(&data, 0, sizeof(driver_data_t));
@@ -355,8 +357,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
-
-
-
-
