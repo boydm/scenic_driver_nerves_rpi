@@ -20,31 +20,27 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "comms.h"
+#include "types.h"
+#include "image.h"
+#include "script.h"
+
+
 #define NANOVG_GLES2_IMPLEMENTATION
 #include "nanovg/nanovg.h"
 #include "nanovg/nanovg_gl.h"
 
-#include "types.h"
-#include "comms.h"
-#include "render_script.h"
 
 #define STDIN_FILENO 0
 
 #define DEFAULT_SCREEN    0
 
-typedef struct {
-  EGLDisplay display;
-  EGLConfig config;
-  EGLSurface surface;
-  EGLContext context;
-  int screen_width;
-  int screen_height;
-  int major_version;
-  int minor_version;
-  NVGcontext* p_ctx;
-} egl_data_t;
 
 #define   MSG_OUT_PUTS              0x02
+
+
+egl_data_t g_egl_data = {0};
+
 
 //---------------------------------------------------------
 // setup the video core
@@ -238,16 +234,16 @@ void test_draw(egl_data_t* p_data) {
   // glClearColor(0.15f, 0.25f, 0.35f, 1.0f);
   // glClearColor(0.098f, 0.098f, 0.439f, 1.0f);    // midnight blue
   // glClearColor(0.545f, 0.000f, 0.000f, 1.0f);    // dark red
-  // glClearColor(0.184f, 0.310f, 0.310f, 1.0f);       // dark slate gray
+  glClearColor(0.184f, 0.310f, 0.310f, 1.0f);       // dark slate gray
   // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);       // black
 
-  // glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   NVGcontext* p_ctx = p_data->p_ctx;
   int screen_width = p_data->screen_width;
   int screen_height = p_data->screen_height;
 
-  // nvgBeginFrame(p_ctx, screen_width, screen_height, 1.0f);
+  nvgBeginFrame(p_ctx, screen_width, screen_height, 1.0f);
 
     // Next, draw graph line
   nvgBeginPath(p_ctx);
@@ -270,89 +266,48 @@ void test_draw(egl_data_t* p_data) {
   nvgFill(p_data->p_ctx);
   nvgStroke(p_ctx);
 
-  // nvgEndFrame(p_ctx);
-
-  // eglSwapBuffers(p_data->display, p_data->surface);
+  nvgEndFrame(p_ctx);
+  eglSwapBuffers(p_data->display, p_data->surface);
 }
 
-
-//---------------------------------------------------------
-// return true if the caller side of the stdin pipe is open and in
-// business. If it closes, then return false
-// http://pubs.opengroup.org/onlinepubs/7908799/xsh/poll.html
-// see https://stackoverflow.com/questions/25147181/pollhup-vs-pollnval-or-what-is-pollhup
-bool isCallerDown()
-{
-    struct pollfd ufd;
-    memset(&ufd, 0, sizeof ufd);
-    ufd.fd = STDIN_FILENO;
-    ufd.events = POLLIN;
-    if ( poll(&ufd, 1, 0) < 0 )
-        return true;
-    return ufd.revents & POLLHUP;
-}
 
 //---------------------------------------------------------
 int main(int argc, char **argv) {
   driver_data_t     data;
-  egl_data_t        egl_data;
 
-  test_endian();
+  // test_endian();
 
   // super simple arg check
-  if ( argc != 5 ) {
+  if ( argc != 4 ) {
     send_puts("Argument check failed!");
     printf("\r\nscenic_driver_nerves_rpi should be launched via the Scenic.Driver.Nerves.Rpi library.\r\n\r\n");
     return 0;
   }
-  int num_scripts = atoi(argv[1]);
-  int debug_mode = atoi(argv[2]);
-  int layer = atoi(argv[3]);
-  int global_opacity = atoi(argv[4]);
+  int debug_mode = atoi(argv[1]);
+  int layer = atoi(argv[2]);
+  int global_opacity = atoi(argv[3]);
+
+  // init the hashtables
+  init_scripts();
+  init_images();
 
   // init graphics
-  init_video_core( &egl_data, debug_mode, layer, global_opacity );
+  init_video_core( &g_egl_data, debug_mode, layer, global_opacity );
+
+  // test_draw( &g_egl_data );
 
   // set up the scripts table
   memset(&data, 0, sizeof(driver_data_t));
-  data.p_scripts = malloc( sizeof(void*) * num_scripts );
-  memset(data.p_scripts, 0, sizeof(void*) * num_scripts );
   data.keep_going = true;
-  data.num_scripts = num_scripts;
-  data.p_ctx = egl_data.p_ctx;
-  data.screen_width = egl_data.screen_width;
-  data.screen_height = egl_data.screen_height;
+  data.p_ctx = g_egl_data.p_ctx;
 
   // signal the app that the window is ready
-  send_ready( 0, egl_data.screen_width, egl_data.screen_height );
+  send_ready();
 
   /* Loop until the calling app closes the window */
   while ( data.keep_going && !isCallerDown() ) {
-
     // check for incoming messages - blocks with a timeout
-    if ( handle_stdio_in(&data) ) {
-
-      // clear the buffer
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      // render the scene
-      nvgBeginFrame( egl_data.p_ctx, egl_data.screen_width, egl_data.screen_height, 1.0f);
-      if ( data.root_script >= 0 ) {
-        run_script( data.root_script, &data );
-      }
-      nvgEndFrame(data.p_ctx);
-
-      // Swap front and back buffers
-      eglSwapBuffers(egl_data.display, egl_data.surface);
-    }
-
-    // wait for events - timeout is in seconds
-    // the timeout is the max time the app will stay alive
-    // after the host BEAM environment shuts down.
-    // glfwWaitEventsTimeout(1.01f);
-
-    // poll for events and return immediately
-    // glfwPollEvents();
+    handle_stdio_in( &data );
   }
 
   return 0;

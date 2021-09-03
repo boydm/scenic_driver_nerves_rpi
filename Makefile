@@ -11,7 +11,7 @@
 
 PREFIX = $(MIX_APP_PATH)/priv
 
-DEFAULT_TARGETS ?= $(PREFIX) $(PREFIX)/scenic_driver_nerves_rpi $(PREFIX)/fonts
+DEFAULT_TARGETS ?= $(PREFIX) $(PREFIX)/scenic_driver_nerves_rpi
 
 # Look for the EI library and header files
 # For crosscompiled builds, ERL_EI_INCLUDE_DIR and ERL_EI_LIBDIR must be
@@ -40,8 +40,9 @@ CFLAGS ?= -O2 -Wall -Wextra -Wno-unused-parameter -pedantic
 
 CFLAGS += -std=gnu99
 
-SRCS = c_src/main.c c_src/comms.c c_src/nanovg/nanovg.c \
-	c_src/render_script.c c_src/tx.c c_src/utils.c
+SRCS = c_src/main.c c_src/nanovg/nanovg.c c_src/comms.c c_src/unix_comms.c \
+c_src/utils.c c_src/script.c c_src/image.c c_src/tommyds/src/tommyhashlin.c \
+c_src/tommyds/src/tommyhash.c
 
 calling_from_make:
 	mix compile
@@ -53,9 +54,6 @@ $(PREFIX):
 
 $(PREFIX)/scenic_driver_nerves_rpi: $(SRCS)
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
-
-$(PREFIX)/fonts: fonts
-	rsync -rupE $< $@
 
 clean:
 	$(RM) -rf $(PREFIX)

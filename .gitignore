@@ -31,3 +31,5 @@ scenic_driver_nerves_rpi-*.tar
 
 # ignore mix.lock
 mix.lock
+
+*/old/*
